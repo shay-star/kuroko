@@ -1,0 +1,73 @@
+# 最低 CMake 版本要求，以及项目名和语言
+cmake_minimum_required(VERSION 3.12)
+project(kuroko C)
+
+
+# 设置 C 语言标准，并指定 Debug 和 Release 模式的编译选项
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_FLAGS_DEBUG "-g")
+set(CMAKE_C_FLAGS_RELEASE "-O2")
+
+# 通用的编译警告选项
+set(COMMON_WARNINGS "-Wall -Wextra -pedantic -Wno-unused-parameter -Wno-format")
+
+# 添加包含目录（用于头文件查找）
+include_directories(${CMAKE_SOURCE_DIR}/src)
+
+# 获取所有源文件，但排除主入口 src/kuroko.c
+file(GLOB KRO_SRC ${CMAKE_SOURCE_DIR}/src/*.c ${CMAKE_SOURCE_DIR}/src/vendor/*.c)
+list(REMOVE_ITEM KRO_SRC ${CMAKE_SOURCE_DIR}/src/kuroko.c)
+
+# 生成静态库：libkuroko_core.a
+add_library(kuroko_core STATIC ${KRO_SRC})
+
+# 生成共享库：libkuroko.so 或 libkuroko.dll
+add_library(kuroko_shared SHARED ${KRO_SRC})
+# 定义编译宏 KRKINLIB，表示代码编译进共享库中
+target_compile_definitions(kuroko_shared PRIVATE KRKINLIB)
+# 设置输出名称为 kuroko，而不是默认的 kuroko_shared
+set_target_properties(kuroko_shared PROPERTIES OUTPUT_NAME "kuroko")
+
+# 主程序可执行文件 kuroko，链接静态库
+add_executable(kuroko src/kuroko.c)
+target_link_libraries(kuroko PRIVATE kuroko_core)
+
+# 自动构建 tools 目录下的所有工具为 krk-xxx 格式
+file(GLOB TOOL_SRCS tools/*.c)
+foreach(tool_src ${TOOL_SRCS})
+    get_filename_component(tool_name ${tool_src} NAME_WE)
+    add_executable(krk-${tool_name} ${tool_src})
+    target_link_libraries(krk-${tool_name} PRIVATE kuroko_shared)
+    target_include_directories(krk-${tool_name} PRIVATE tools)
+endforeach()
+
+# 将 src/modules/module_*.c 文件构建为对应的模块 .so/.dll
+file(GLOB MODULE_SRCS src/modules/module_*.c)
+list(REMOVE_ITEM MODULE_SRCS src/modules/module_socket.c)
+list(REMOVE_ITEM MODULE_SRCS src/modules/module_time.c)
+# foreach(mod_src ${MODULE_SRCS})
+#     get_filename_component(mod_name ${mod_src} NAME_WE)
+#     string(REPLACE "src/modules/module_" "" so_name ${mod_name})
+#     add_library(${so_name} SHARED ${mod_src})
+#     target_link_libraries(${so_name} PRIVATE kuroko_shared)
+#     # 去除 lib 前缀，使模块名就是模块文件名
+#     set_target_properties(${so_name} PROPERTIES PREFIX "" OUTPUT_NAME ${so_name})
+# endforeach()
+
+# 安装规则：可执行文件、库、头文件和模块
+install(TARGETS kuroko kuroko_shared kuroko_core
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib
+        RUNTIME DESTINATION bin)
+install(DIRECTORY src/kuroko DESTINATION include/kuroko)  # 安装头文件
+install(DIRECTORY modules/ DESTINATION lib/kuroko FILES_MATCHING PATTERN "*.krk")  # 安装 .krk 源码模块
+install(TARGETS ${MODULE_NAMES} DESTINATION lib/kuroko)  # 安装 C 模块库
+
+# Windows 平台特定配置
+# if(WIN32)
+#     # 共享库依赖 ws2_32 (Winsock)
+#     target_link_libraries(kuroko_shared PRIVATE ws2_32)
+#     foreach(tool_exe krk-*)
+#         target_link_libraries(${tool_exe} PRIVATE ws2_32)
+#     endforeach()
+# endif()
