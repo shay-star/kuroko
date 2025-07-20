@@ -20,12 +20,12 @@
  * 2-operand opcodes are generally jump instructions.
  */
 typedef enum {
-#define OPCODE(opc)         opc,
-#define SIMPLE(opc)         OPCODE(opc)
-#define CONSTANT(opc,more)  OPCODE(opc) OPCODE(opc ## _LONG)
-#define OPERAND(opc,more)   OPCODE(opc) OPCODE(opc ## _LONG)
-#define JUMP(opc,sign)      OPCODE(opc)
-#define COMPLICATED(opc,more) OPCODE(opc)
+#define OPCODE(opc) opc,
+#define SIMPLE(opc) OPCODE(opc)
+#define CONSTANT(opc, more) OPCODE(opc) OPCODE(opc##_LONG)
+#define OPERAND(opc, more) OPCODE(opc) OPCODE(opc##_LONG)
+#define JUMP(opc, sign) OPCODE(opc)
+#define COMPLICATED(opc, more) OPCODE(opc)
 #define CLOSURE_MORE
 #define EXPAND_ARGS_MORE
 #define FORMAT_VALUE_MORE

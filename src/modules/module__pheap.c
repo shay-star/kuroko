@@ -27,7 +27,7 @@
 #include <kuroko/vm.h>
 #include <kuroko/util.h>
 
-static KrkClass * PHeapClass;
+static KrkClass *PHeapClass;
 
 /**
  * @brief Heap node.
@@ -38,10 +38,10 @@ static KrkClass * PHeapClass;
  */
 typedef struct PHeap PHeap;
 struct PHeap {
-	struct PHeap_Obj * owner;
-	KrkValue value;
-	PHeap * subheaps; /* Left pointer to first child, if any. */
-	PHeap * next;  /* Right pointer to next sibling, if any. */
+    struct PHeap_Obj *owner;
+    KrkValue value;
+    PHeap *subheaps; /* Left pointer to first child, if any. */
+    PHeap *next;     /* Right pointer to next sibling, if any. */
 };
 
 /**
@@ -67,42 +67,43 @@ typedef int (*pheap_comparator_func)(PHeap *, PHeap *);
  *
  * @param left       One heap. Can be @c NULL for an empty heap.
  * @param right      The other heap. Can be @c NULL for an empty heap.
- * @param comparator Function that should return true if @p left has priority (is less than) @p right.
+ * @param comparator Function that should return true if @p left has priority (is less
+ * than) @p right.
  * @returns A pointer to the new root, which will be either of @p left or @p right.
  */
-static PHeap * pheap_meld(PHeap * left, PHeap * right, pheap_comparator_func comparator) {
-	/*
-	 * If either of the heaps is "empty" (represented by NULL),
-	 * then simply return the other one.
-	 */
-	if (!left) {
-		return right;
-	}
-	if (!right) {
-		return left;
-	}
+static PHeap *pheap_meld(PHeap *left, PHeap *right, pheap_comparator_func comparator) {
+    /*
+     * If either of the heaps is "empty" (represented by NULL),
+     * then simply return the other one.
+     */
+    if (!left) {
+        return right;
+    }
+    if (!right) {
+        return left;
+    }
 
-	/*
-	 * Otherwise, pull the 'smaller' of the two up and add the 'larger'
-	 * to the front of the subheap list of the smaller one. We use
-	 * intrusive lists within our Heap struct, so each Heap is also
-	 * a List node (with a `next` pointer).
-	 */
-	if (comparator(left, right)) {
-		/* Turns `left` into Heap(left→value, right :: left→subheaps) */
-		if (left->subheaps) {
-			right->next = left->subheaps;
-		}
-		left->subheaps = right;
-		return left;
-	} else {
-		/* Turns `right` into Heap(right→value, left :: right→subheaps) */
-		if (right->subheaps) {
-			left->next = right->subheaps;
-		}
-		right->subheaps = left;
-		return right;
-	}
+    /*
+     * Otherwise, pull the 'smaller' of the two up and add the 'larger'
+     * to the front of the subheap list of the smaller one. We use
+     * intrusive lists within our Heap struct, so each Heap is also
+     * a List node (with a `next` pointer).
+     */
+    if (comparator(left, right)) {
+        /* Turns `left` into Heap(left→value, right :: left→subheaps) */
+        if (left->subheaps) {
+            right->next = left->subheaps;
+        }
+        left->subheaps = right;
+        return left;
+    } else {
+        /* Turns `right` into Heap(right→value, left :: right→subheaps) */
+        if (right->subheaps) {
+            left->next = right->subheaps;
+        }
+        right->subheaps = left;
+        return right;
+    }
 }
 
 /**
@@ -114,25 +115,26 @@ static PHeap * pheap_meld(PHeap * left, PHeap * right, pheap_comparator_func com
  * @param comparator Comparator function as described in @c pheap_meld.
  * @returns the resulting heap.
  */
-static PHeap * pheap_merge_pairs(PHeap * list, pheap_comparator_func comparator) {
-	if (!list) {
-		/* An empty list is represented by NULL, and yields an empty Heap,
-		 * which is also represented by NULL... */
-		return NULL;
-	} else if (list->next == NULL) {
-		/* If a list entry doesn't have a next, it has a size of one,
-		 * and we can just return this heap directly. */
-		return list;
-	} else {
-		/* Otherwise we meld the first two, then meld them with the result of
-		 * recursively melding the rest, which performs our left-right /
-		 * right-left two-stage merge. */
-		PHeap * next  = list->next;
-		list->next = NULL;
-		PHeap * rest = next->next;
-		next->next = NULL;
-		return pheap_meld(pheap_meld(list, next, comparator), pheap_merge_pairs(rest, comparator), comparator);
-	}
+static PHeap *pheap_merge_pairs(PHeap *list, pheap_comparator_func comparator) {
+    if (!list) {
+        /* An empty list is represented by NULL, and yields an empty Heap,
+         * which is also represented by NULL... */
+        return NULL;
+    } else if (list->next == NULL) {
+        /* If a list entry doesn't have a next, it has a size of one,
+         * and we can just return this heap directly. */
+        return list;
+    } else {
+        /* Otherwise we meld the first two, then meld them with the result of
+         * recursively melding the rest, which performs our left-right /
+         * right-left two-stage merge. */
+        PHeap *next = list->next;
+        list->next = NULL;
+        PHeap *rest = next->next;
+        next->next = NULL;
+        return pheap_meld(pheap_meld(list, next, comparator),
+                          pheap_merge_pairs(rest, comparator), comparator);
+    }
 }
 
 /**
@@ -145,9 +147,9 @@ static PHeap * pheap_merge_pairs(PHeap * list, pheap_comparator_func comparator)
  * @param comparator Comparator function as described in @c pheap_meld.
  * @returns the resulting heap.
  */
-static PHeap * pheap_delete_min(PHeap * heap, pheap_comparator_func comparator) {
-	PHeap * subs = heap->subheaps;
-	return pheap_merge_pairs(subs, comparator);
+static PHeap *pheap_delete_min(PHeap *heap, pheap_comparator_func comparator) {
+    PHeap *subs = heap->subheaps;
+    return pheap_merge_pairs(subs, comparator);
 }
 
 /**
@@ -159,11 +161,12 @@ static PHeap * pheap_delete_min(PHeap * heap, pheap_comparator_func comparator) 
  * @param func Function to call.
  * @param extra User data to pass to the function.
  */
-static void pheap_visit_heap(PHeap * heap, void (*func)(PHeap *, void*), void* extra) {
-	if (!heap) return;
-	func(heap, extra);
-	pheap_visit_heap(heap->subheaps, func, extra);
-	pheap_visit_heap(heap->next, func, extra);
+static void pheap_visit_heap(PHeap *heap, void (*func)(PHeap *, void *), void *extra) {
+    if (!heap)
+        return;
+    func(heap, extra);
+    pheap_visit_heap(heap->subheaps, func, extra);
+    pheap_visit_heap(heap->next, func, extra);
 }
 
 /**
@@ -176,140 +179,137 @@ static void pheap_visit_heap(PHeap * heap, void (*func)(PHeap *, void*), void* e
  * @param func Function to call.
  * @param extra User data to pass to the function.
  */
-static void pheap_visit_heap_after(PHeap * heap, void (*func)(PHeap *, void*), void* extra) {
-	if (!heap) return;
-	pheap_visit_heap_after(heap->subheaps, func, extra);
-	pheap_visit_heap_after(heap->next, func, extra);
-	func(heap, extra);
+static void pheap_visit_heap_after(PHeap *heap, void (*func)(PHeap *, void *),
+                                   void *extra) {
+    if (!heap)
+        return;
+    pheap_visit_heap_after(heap->subheaps, func, extra);
+    pheap_visit_heap_after(heap->next, func, extra);
+    func(heap, extra);
 }
 
 struct PHeap_Obj {
-	KrkInstance inst;
-	KrkValue comparator;
-	PHeap * heap;
-	size_t count;
+    KrkInstance inst;
+    KrkValue comparator;
+    PHeap *heap;
+    size_t count;
 };
 
-#define IS_PHeap(o) (krk_isInstanceOf(o,PHeapClass))
-#define AS_PHeap(o) ((struct PHeap_Obj*)AS_OBJECT(o))
+#define IS_PHeap(o) (krk_isInstanceOf(o, PHeapClass))
+#define AS_PHeap(o) ((struct PHeap_Obj *)AS_OBJECT(o))
 #define CURRENT_CTYPE struct PHeap_Obj *
 #define CURRENT_NAME self
 
-KRK_Method(PHeap,__init__) {
-	KrkValue comparator;
-	if (!krk_parseArgs(".V:PHeap", (const char*[]){"comp"}, &comparator)) return NONE_VAL();
-	self->comparator = comparator;
-	return NONE_VAL();
+KRK_Method(PHeap, __init__) {
+    KrkValue comparator;
+    if (!krk_parseArgs(".V:PHeap", (const char *[]){"comp"}, &comparator))
+        return NONE_VAL();
+    self->comparator = comparator;
+    return NONE_VAL();
 }
 
-static int run_comparator(PHeap * left, PHeap * right) {
-	assert(left->owner == right->owner);
-	krk_push(left->owner->comparator);
-	krk_push(left->value);
-	krk_push(right->value);
-	KrkValue result = krk_callStack(2);
-	if (!IS_BOOLEAN(result)) return 0;
-	return AS_BOOLEAN(result);
+static int run_comparator(PHeap *left, PHeap *right) {
+    assert(left->owner == right->owner);
+    krk_push(left->owner->comparator);
+    krk_push(left->value);
+    krk_push(right->value);
+    KrkValue result = krk_callStack(2);
+    if (!IS_BOOLEAN(result))
+        return 0;
+    return AS_BOOLEAN(result);
 }
 
-KRK_Method(PHeap,insert) {
-	KrkValue value;
-	if (!krk_parseArgs(".V",(const char*[]){"value"}, &value)) return NONE_VAL();
-	struct PHeap * node = calloc(sizeof(struct PHeap), 1);
-	node->owner = self;
-	node->value = value;
-	self->heap = pheap_meld(self->heap, node, run_comparator);
-	self->count += 1;
-	return NONE_VAL();
+KRK_Method(PHeap, insert) {
+    KrkValue value;
+    if (!krk_parseArgs(".V", (const char *[]){"value"}, &value))
+        return NONE_VAL();
+    struct PHeap *node = calloc(sizeof(struct PHeap), 1);
+    node->owner = self;
+    node->value = value;
+    self->heap = pheap_meld(self->heap, node, run_comparator);
+    self->count += 1;
+    return NONE_VAL();
 }
 
-KRK_Method(PHeap,peek) {
-	if (self->heap) return self->heap->value;
-	return NONE_VAL();
+KRK_Method(PHeap, peek) {
+    if (self->heap)
+        return self->heap->value;
+    return NONE_VAL();
 }
 
-KRK_Method(PHeap,pop) {
-	PHeap * old = self->heap;
-	if (!old) return krk_runtimeError(vm.exceptions->indexError, "pop from empty heap");
-	self->heap = pheap_delete_min(self->heap, run_comparator);
-	self->count -= 1;
-	KrkValue out = old->value;
-	free(old);
-	return out;
+KRK_Method(PHeap, pop) {
+    PHeap *old = self->heap;
+    if (!old)
+        return krk_runtimeError(vm.exceptions->indexError, "pop from empty heap");
+    self->heap = pheap_delete_min(self->heap, run_comparator);
+    self->count -= 1;
+    KrkValue out = old->value;
+    free(old);
+    return out;
 }
 
-KRK_Method(PHeap,__bool__) {
-	return BOOLEAN_VAL(self->heap != NULL);
+KRK_Method(PHeap, __bool__) { return BOOLEAN_VAL(self->heap != NULL); }
+
+KRK_Method(PHeap, __len__) { return INTEGER_VAL(self->count); }
+
+static void run_visitor(PHeap *heap, void *visitor) {
+    krk_push(*(KrkValue *)visitor);
+    krk_push(heap->value);
+    krk_callStack(1);
 }
 
-KRK_Method(PHeap,__len__) {
-	return INTEGER_VAL(self->count);
+KRK_Method(PHeap, visit) {
+    KrkValue func;
+    int after = 0;
+    if (!krk_parseArgs(".V|p", (const char *[]){"func", "after"}, &func, &after))
+        return NONE_VAL();
+
+    (after ? pheap_visit_heap_after : pheap_visit_heap)(self->heap, run_visitor, &func);
+
+    return NONE_VAL();
 }
 
-static void run_visitor(PHeap * heap, void * visitor) {
-	krk_push(*(KrkValue*)visitor);
-	krk_push(heap->value);
-	krk_callStack(1);
+static void _scan_one(PHeap *heap, void *unused) { krk_markValue(heap->value); }
+
+static void _pheap_scan(KrkInstance *_self) {
+    struct PHeap_Obj *self = (void *)_self;
+    krk_markValue(self->comparator);
+    pheap_visit_heap(self->heap, _scan_one, NULL);
 }
 
-KRK_Method(PHeap,visit) {
-	KrkValue func;
-	int after = 0;
-	if (!krk_parseArgs(".V|p",(const char*[]){"func","after"},
-		&func, &after)) return NONE_VAL();
+static void _free_one(PHeap *heap, void *unused) { free(heap); }
 
-	(after ? pheap_visit_heap_after : pheap_visit_heap)(self->heap, run_visitor, &func);
-
-	return NONE_VAL();
+static void _pheap_sweep(KrkInstance *_self) {
+    struct PHeap_Obj *self = (void *)_self;
+    pheap_visit_heap_after(self->heap, _free_one, NULL);
 }
 
-static void _scan_one(PHeap * heap, void * unused) {
-	krk_markValue(heap->value);
-}
-
-static void _pheap_scan(KrkInstance * _self) {
-	struct PHeap_Obj * self = (void*)_self;
-	krk_markValue(self->comparator);
-	pheap_visit_heap(self->heap, _scan_one, NULL);
-}
-
-static void _free_one(PHeap * heap, void * unused) {
-	free(heap);
-}
-
-static void _pheap_sweep(KrkInstance * _self) {
-	struct PHeap_Obj * self = (void*)_self;
-	pheap_visit_heap_after(self->heap,_free_one, NULL);
-}
-
-KRK_Method(PHeap,comp) {
-	return self->comparator;
-}
+KRK_Method(PHeap, comp) { return self->comparator; }
 
 KRK_Module(_pheap) {
-	KRK_DOC(module, "Pairing heap with simple insert and pop-min operations.");
+    KRK_DOC(module, "Pairing heap with simple insert and pop-min operations.");
 
-	KrkClass * PHeap = krk_makeClass(module, &PHeapClass, "PHeap", vm.baseClasses->objectClass);
-	KRK_DOC(PHeap,"Pairing heap with simple insert and pop-min operations.");
-	PHeap->allocSize = sizeof(struct PHeap_Obj);
-	PHeap->_ongcscan = _pheap_scan;
-	PHeap->_ongcsweep = _pheap_sweep;
+    KrkClass *PHeap =
+        krk_makeClass(module, &PHeapClass, "PHeap", vm.baseClasses->objectClass);
+    KRK_DOC(PHeap, "Pairing heap with simple insert and pop-min operations.");
+    PHeap->allocSize = sizeof(struct PHeap_Obj);
+    PHeap->_ongcscan = _pheap_scan;
+    PHeap->_ongcsweep = _pheap_sweep;
 
-	KRK_DOC(BIND_METHOD(PHeap,__init__),
-		"@arguments comp\n\n"
-		"Create a new pairing heap governed by the given comparator function.");
-	KRK_DOC(BIND_METHOD(PHeap,insert),
-		"@arguments value\n\n"
-		"Insert a new element into the heap.");
-	KRK_DOC(BIND_METHOD(PHeap,peek),
-		"Retrieve the root (smallest) element of the heap, or None if it is empty.");
-	KRK_DOC(BIND_METHOD(PHeap,pop),
-		"Remove and return the root (smallest) element of the heap. If the heap is empty, IndexError is raised.");
-	BIND_METHOD(PHeap,__bool__);
-	BIND_METHOD(PHeap,__len__);
-	KRK_DOC(BIND_METHOD(PHeap,visit),
-		"@arguments func,after=False\n\n"
-		"Call a function for each element of the heap.");
-	BIND_PROP(PHeap,comp);
-	krk_finalizeClass(PHeapClass);
+    KRK_DOC(BIND_METHOD(PHeap, __init__),
+            "@arguments comp\n\n"
+            "Create a new pairing heap governed by the given comparator function.");
+    KRK_DOC(BIND_METHOD(PHeap, insert), "@arguments value\n\n"
+                                        "Insert a new element into the heap.");
+    KRK_DOC(BIND_METHOD(PHeap, peek),
+            "Retrieve the root (smallest) element of the heap, or None if it is empty.");
+    KRK_DOC(BIND_METHOD(PHeap, pop),
+            "Remove and return the root (smallest) element of the heap. If the heap is "
+            "empty, IndexError is raised.");
+    BIND_METHOD(PHeap, __bool__);
+    BIND_METHOD(PHeap, __len__);
+    KRK_DOC(BIND_METHOD(PHeap, visit), "@arguments func,after=False\n\n"
+                                       "Call a function for each element of the heap.");
+    BIND_PROP(PHeap, comp);
+    krk_finalizeClass(PHeapClass);
 }

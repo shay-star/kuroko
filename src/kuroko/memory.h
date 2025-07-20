@@ -8,9 +8,9 @@
 #include "table.h"
 
 #define KRK_GROW_CAPACITY(c) ((c) < 8 ? 8 : (c) * 2)
-#define KRK_GROW_ARRAY(t,p,o,n) (t*)krk_reallocate(p,sizeof(t)*o,sizeof(t)*n)
-#define KRK_FREE_ARRAY(t,a,c) krk_reallocate(a,sizeof(t) * c, 0)
-#define KRK_ALLOCATE(type, count) (type*)krk_reallocate(NULL,0,sizeof(type)*(count))
+#define KRK_GROW_ARRAY(t, p, o, n) (t *)krk_reallocate(p, sizeof(t) * o, sizeof(t) * n)
+#define KRK_FREE_ARRAY(t, a, c) krk_reallocate(a, sizeof(t) * c, 0)
+#define KRK_ALLOCATE(type, count) (type *)krk_reallocate(NULL, 0, sizeof(type) * (count))
 
 /**
  * @brief Resize an allocated heap object.
@@ -24,7 +24,7 @@
  * @param new New size of the object.
  * @return New pointer for heap object.
  */
-extern void * krk_reallocate(void * ptr, size_t old, size_t new);
+extern void *krk_reallocate(void *ptr, size_t old, size_t new);
 
 /**
  * @brief Release all objects.
@@ -63,7 +63,7 @@ extern void krk_markValue(KrkValue value);
  *
  * @param object The object to mark.
  */
-extern void krk_markObject(KrkObj * object);
+extern void krk_markObject(KrkObj *object);
 
 /**
  * @brief During a GC scan cycle, mark the contents of a table as used.
@@ -73,7 +73,7 @@ extern void krk_markObject(KrkObj * object);
  *
  * @param table The table to mark.
  */
-extern void krk_markTable(KrkTable * table);
+extern void krk_markTable(KrkTable *table);
 
 /**
  * @brief Assume ownership of @p size bytes at @p ptr
@@ -86,4 +86,4 @@ extern void krk_markTable(KrkTable * table);
  * @param ptr Pointer to take ownership of
  * @param size Size of data at @p ptr
  */
-extern void krk_gcTakeBytes(const void * ptr, size_t size);
+extern void krk_gcTakeBytes(const void *ptr, size_t size);

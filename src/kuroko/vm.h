@@ -42,12 +42,17 @@
  * handler to roll back execution to the appropriate environment.
  */
 typedef struct {
-	KrkClosure * closure; /**< Pointer to the function object containing the code object for this frame */
-	uint8_t * ip;         /**< Instruction pointer within the code object's bytecode data */
-	size_t slots;         /**< Offset into the stack at which this function call's arguments begin */
-	size_t outSlots;      /**< Offset into the stack at which stackTop will be reset upon return */
-	KrkTable * globals;   /**< Pointer to the attribute table containing valud global vairables for this call */
-	KrkValue   globalsOwner; /**< Owner of the current globals context, to give to new closures. */
+    KrkClosure *closure; /**< Pointer to the function object containing the code object
+                            for this frame */
+    uint8_t *ip; /**< Instruction pointer within the code object's bytecode data */
+    size_t
+        slots; /**< Offset into the stack at which this function call's arguments begin */
+    size_t outSlots;       /**< Offset into the stack at which stackTop will be reset upon
+                              return */
+    KrkTable *globals;     /**< Pointer to the attribute table containing valud global
+                              vairables for this call */
+    KrkValue globalsOwner; /**< Owner of the current globals context, to give to new
+                              closures. */
 } KrkCallFrame;
 
 /**
@@ -61,25 +66,43 @@ typedef struct {
  * @see krk_runtimeException
  */
 struct Exceptions {
-	KrkClass * baseException;       /**< @exception BaseException The base exception type. */
-	KrkClass * typeError;           /**< @exception TypeError An argument or value was not of the expected type. */
-	KrkClass * argumentError;       /**< @exception ArgumentException The number of arguments passed to a function was not as expected. */
-	KrkClass * indexError;          /**< @exception IndexError An attempt was made to reference an invalid array index. */
-	KrkClass * keyError;            /**< @exception KeyError An attempt was made to reference an invalid mapping key. */
-	KrkClass * attributeError;      /**< @exception AttributeError An attempt was made to reference an invalid object property. */
-	KrkClass * nameError;           /**< @exception NameError An attempt was made to reference an undeclared global variable. */
-	KrkClass * importError;         /**< @exception ImportError An error was encountered when attempting to import a module. */
-	KrkClass * ioError;             /**< @exception IOError An error was encountered in operating system's IO library. */
-	KrkClass * valueError;          /**< @exception ValueError The value of a parameter or variable is not valid. */
-	KrkClass * keyboardInterrupt;   /**< @exception KeyboardInterrupt An interrupt signal was received. */
-	KrkClass * zeroDivisionError;   /**< @exception ZeroDivisionError A mathematical function attempted to divide by zero. */
-	KrkClass * notImplementedError; /**< @exception NotImplementedError The method is not implemented, either for the given arguments or in general. */
-	KrkClass * syntaxError;         /**< @exception SyntaxError The compiler encountered an unrecognized or invalid source code input. */
-	KrkClass * assertionError;      /**< @exception AssertionError An @c assert statement failed. */
-	KrkClass * OSError;             /**< @exception os.OSError Raised by os module functions. */
-	KrkClass * ThreadError;         /**< @exception threading.ThreadError Raised by threading module functions. */
-	KrkClass * Exception;           /**< @exception Exception The main exception type that most other exceptions subclass. */
-	KrkClass * SystemError;         /**< @exception SystemError Something we can throw when C code is broken. */
+    KrkClass *baseException; /**< @exception BaseException The base exception type. */
+    KrkClass *typeError;     /**< @exception TypeError An argument or value was not of the
+                                expected type. */
+    KrkClass *argumentError; /**< @exception ArgumentException The number of arguments
+                                passed to a function was not as expected. */
+    KrkClass *indexError; /**< @exception IndexError An attempt was made to reference an
+                             invalid array index. */
+    KrkClass *keyError;   /**< @exception KeyError An attempt was made to reference an
+                             invalid mapping key. */
+    KrkClass *attributeError; /**< @exception AttributeError An attempt was made to
+                                 reference an invalid object property. */
+    KrkClass *nameError;   /**< @exception NameError An attempt was made to reference an
+                              undeclared global variable. */
+    KrkClass *importError; /**< @exception ImportError An error was encountered when
+                              attempting to import a module. */
+    KrkClass *ioError;     /**< @exception IOError An error was encountered in operating
+                              system's IO library. */
+    KrkClass *valueError;  /**< @exception ValueError The value of a parameter or variable
+                              is not valid. */
+    KrkClass *keyboardInterrupt; /**< @exception KeyboardInterrupt An interrupt signal was
+                                    received. */
+    KrkClass *zeroDivisionError; /**< @exception ZeroDivisionError A mathematical function
+                                    attempted to divide by zero. */
+    KrkClass *notImplementedError; /**< @exception NotImplementedError The method is not
+                                      implemented, either for the given arguments or in
+                                      general. */
+    KrkClass *syntaxError;         /**< @exception SyntaxError The compiler encountered an
+                                      unrecognized or invalid source code input. */
+    KrkClass
+        *assertionError; /**< @exception AssertionError An @c assert statement failed. */
+    KrkClass *OSError;   /**< @exception os.OSError Raised by os module functions. */
+    KrkClass *ThreadError; /**< @exception threading.ThreadError Raised by threading
+                              module functions. */
+    KrkClass *Exception; /**< @exception Exception The main exception type that most other
+                            exceptions subclass. */
+    KrkClass *SystemError; /**< @exception SystemError Something we can throw when C code
+                              is broken. */
 };
 
 /**
@@ -95,49 +118,56 @@ struct Exceptions {
  *       it looks nicer. The ordering here is part of our library ABI.
  */
 struct BaseClasses {
-	KrkClass * objectClass;          /**< The base of all classes within the type tree. */
-	KrkClass * moduleClass;          /**< A class for representing imported modules, both managed and C. */
-	KrkClass * typeClass;            /**< Classes themselves are of this class. */
-	KrkClass * intClass;             /**< Primitive integer type. */
-	KrkClass * floatClass;           /**< Primitive double-precision floating-point type. */
-	KrkClass * boolClass;            /**< Primitive boolean type. */
-	KrkClass * noneTypeClass;        /**< The class of the None value. */
-	KrkClass * strClass;             /**< Built-in Unicode string type. */
-	KrkClass * functionClass;        /**< Represents a function object (KrkClosure) or native bind (KrkNative) */
-	KrkClass * methodClass;          /**< Represents a bound method (KrkBoundMethod) */
-	KrkClass * tupleClass;           /**< An immutable collection of arbitrary values. */
-	KrkClass * bytesClass;           /**< An immutable sequence of bytes. */
-	KrkClass * listiteratorClass;    /**< Iterator over lists */
-	KrkClass * rangeClass;           /**< An object representing a start and end point for a sequence of integers. */
-	KrkClass * rangeiteratorClass;   /**< Iterator over a range of values */
-	KrkClass * striteratorClass;     /**< Iterator over characters (by codepoint) in a string */
-	KrkClass * tupleiteratorClass;   /**< Iterator over values in a tuple */
-	KrkClass * listClass;            /**< Mutable collection of arbitrary values. */
-	KrkClass * dictClass;            /**< Mutable mapping of hashable keys to arbitrary values. */
-	KrkClass * dictitemsClass;       /**< Iterator over the (key,value) pairs of a dict */
-	KrkClass * dictkeysClass;        /**< Iterator over the keys of a dict */
-	KrkClass * bytesiteratorClass;   /**< Iterator over the integer byte values of a bytes object. */
-	KrkClass * propertyClass;        /**< Magic object that calls a function when accessed from an instance through the dot operator. */
-	KrkClass * codeobjectClass;      /**< Static compiled bytecode container (KrkCodeObject) */
-	KrkClass * generatorClass;       /**< Generator object. */
-	KrkClass * notImplClass;         /**< NotImplementedType */
-	KrkClass * bytearrayClass;       /**< Mutable array of bytes */
-	KrkClass * dictvaluesClass;      /**< Iterator over values of a dict */
-	KrkClass * sliceClass;           /**< Slice object */
-	KrkClass * longClass;            /**< Arbitrary precision integer */
-	KrkClass * mapClass;             /**< Apply a function to entries from an iterator. */
-	KrkClass * zipClass;             /**< Yield elements from multiple iterators. */
-	KrkClass * filterClass;          /**< Yield elements from an iterator for which a function returns a truthy value. */
-	KrkClass * enumerateClass;       /**< Yield pairs of indexes and values from an iterator. */
-	KrkClass * HelperClass;          /**< Class implementation of 'help' object */
-	KrkClass * LicenseReaderClass;   /**< Class implementation of 'license' object */
-	KrkClass * CompilerStateClass;   /**< Compiler global state */
-	KrkClass * CellClass;            /**< Upvalue cell */
-	KrkClass * setClass;             /**< Unordered hashset */
-	KrkClass * setiteratorClass;     /**< Iterator over values in a set */
-	KrkClass * ThreadClass;          /**< Threading.Thread */
-	KrkClass * LockClass;            /**< Threading.Lock */
-	KrkClass * ellipsisClass;        /**< Type of the Ellipsis (...) singleton */
+    KrkClass *objectClass;   /**< The base of all classes within the type tree. */
+    KrkClass *moduleClass;   /**< A class for representing imported modules, both managed
+                                and C. */
+    KrkClass *typeClass;     /**< Classes themselves are of this class. */
+    KrkClass *intClass;      /**< Primitive integer type. */
+    KrkClass *floatClass;    /**< Primitive double-precision floating-point type. */
+    KrkClass *boolClass;     /**< Primitive boolean type. */
+    KrkClass *noneTypeClass; /**< The class of the None value. */
+    KrkClass *strClass;      /**< Built-in Unicode string type. */
+    KrkClass *functionClass; /**< Represents a function object (KrkClosure) or native bind
+                                (KrkNative) */
+    KrkClass *methodClass;   /**< Represents a bound method (KrkBoundMethod) */
+    KrkClass *tupleClass;    /**< An immutable collection of arbitrary values. */
+    KrkClass *bytesClass;    /**< An immutable sequence of bytes. */
+    KrkClass *listiteratorClass; /**< Iterator over lists */
+    KrkClass *rangeClass; /**< An object representing a start and end point for a sequence
+                             of integers. */
+    KrkClass *rangeiteratorClass; /**< Iterator over a range of values */
+    KrkClass
+        *striteratorClass; /**< Iterator over characters (by codepoint) in a string */
+    KrkClass *tupleiteratorClass; /**< Iterator over values in a tuple */
+    KrkClass *listClass;          /**< Mutable collection of arbitrary values. */
+    KrkClass *dictClass; /**< Mutable mapping of hashable keys to arbitrary values. */
+    KrkClass *dictitemsClass;     /**< Iterator over the (key,value) pairs of a dict */
+    KrkClass *dictkeysClass;      /**< Iterator over the keys of a dict */
+    KrkClass *bytesiteratorClass; /**< Iterator over the integer byte values of a bytes
+                                     object. */
+    KrkClass *propertyClass; /**< Magic object that calls a function when accessed from an
+                                instance through the dot operator. */
+    KrkClass *codeobjectClass; /**< Static compiled bytecode container (KrkCodeObject) */
+    KrkClass *generatorClass;  /**< Generator object. */
+    KrkClass *notImplClass;    /**< NotImplementedType */
+    KrkClass *bytearrayClass;  /**< Mutable array of bytes */
+    KrkClass *dictvaluesClass; /**< Iterator over values of a dict */
+    KrkClass *sliceClass;      /**< Slice object */
+    KrkClass *longClass;       /**< Arbitrary precision integer */
+    KrkClass *mapClass;        /**< Apply a function to entries from an iterator. */
+    KrkClass *zipClass;        /**< Yield elements from multiple iterators. */
+    KrkClass *filterClass;     /**< Yield elements from an iterator for which a function
+                                  returns a truthy value. */
+    KrkClass *enumerateClass;  /**< Yield pairs of indexes and values from an iterator. */
+    KrkClass *HelperClass;     /**< Class implementation of 'help' object */
+    KrkClass *LicenseReaderClass; /**< Class implementation of 'license' object */
+    KrkClass *CompilerStateClass; /**< Compiler global state */
+    KrkClass *CellClass;          /**< Upvalue cell */
+    KrkClass *setClass;           /**< Unordered hashset */
+    KrkClass *setiteratorClass;   /**< Iterator over values in a set */
+    KrkClass *ThreadClass;        /**< Threading.Thread */
+    KrkClass *LockClass;          /**< Threading.Lock */
+    KrkClass *ellipsisClass;      /**< Type of the Ellipsis (...) singleton */
 };
 
 /**
@@ -150,23 +180,28 @@ struct BaseClasses {
  * @see krk_currentThread
  */
 typedef struct KrkThreadState {
-	struct KrkThreadState * next; /**< Invasive list pointer to next thread. */
+    struct KrkThreadState *next; /**< Invasive list pointer to next thread. */
 
-	KrkCallFrame * frames;     /**< Call frame stack for this thread, max KRK_CALL_FRAMES_MAX */
-	size_t frameCount;         /**< Number of active call frames. */
-	size_t stackSize;          /**< Size of the allocated stack space for this thread. */
-	KrkValue * stack;          /**< Pointer to the bottom of the stack for this thread. */
-	KrkValue * stackTop;       /**< Pointer to the top of the stack. */
-	KrkUpvalue * openUpvalues; /**< Flexible array of unclosed upvalues. */
-	ssize_t exitOnFrame;       /**< When called in a nested context, the frame offset to exit the VM dispatch loop on. */
+    KrkCallFrame
+        *frames;        /**< Call frame stack for this thread, max KRK_CALL_FRAMES_MAX */
+    size_t frameCount;  /**< Number of active call frames. */
+    size_t stackSize;   /**< Size of the allocated stack space for this thread. */
+    KrkValue *stack;    /**< Pointer to the bottom of the stack for this thread. */
+    KrkValue *stackTop; /**< Pointer to the top of the stack. */
+    KrkUpvalue *openUpvalues; /**< Flexible array of unclosed upvalues. */
+    ssize_t exitOnFrame; /**< When called in a nested context, the frame offset to exit
+                            the VM dispatch loop on. */
 
-	KrkInstance * module;      /**< The current module execution context. */
-	KrkValue currentException; /**< When an exception is thrown, it is stored here. */
-	int flags;                 /**< Thread-local VM flags; each thread inherits the low byte of the global VM flags. */
-	unsigned int maximumCallDepth;  /**< Maximum recursive call depth. */
-	KrkValue * stackMax;       /**< End of allocated stack space. */
+    KrkInstance *module;       /**< The current module execution context. */
+    KrkValue currentException; /**< When an exception is thrown, it is stored here. */
+    int flags; /**< Thread-local VM flags; each thread inherits the low byte of the global
+                  VM flags. */
+    unsigned int maximumCallDepth; /**< Maximum recursive call depth. */
+    KrkValue *stackMax;            /**< End of allocated stack space. */
 
-	KrkValue scratchSpace[KRK_THREAD_SCRATCH_SIZE]; /**< A place to store a few values to keep them from being prematurely GC'd. */
+    KrkValue
+        scratchSpace[KRK_THREAD_SCRATCH_SIZE]; /**< A place to store a few values to keep
+                                                  them from being prematurely GC'd. */
 } KrkThreadState;
 
 /**
@@ -178,50 +213,53 @@ typedef struct KrkThreadState {
  * and the state of the (shared) garbage collector.
  */
 typedef struct KrkVM {
-	int globalFlags;                  /**< Global VM state flags */
-	char * binpath;                   /**< A string representing the name of the interpreter binary. */
-	KrkTable strings;                 /**< Strings table */
-	KrkTable modules;                 /**< Module cache */
-	KrkInstance * builtins;           /**< '\__builtins__' module */
-	KrkInstance * system;             /**< 'kuroko' module */
-	KrkValue * specialMethodNames;    /**< Cached strings of important method and function names */
-	struct BaseClasses * baseClasses; /**< Pointer to a (static) namespacing struct for the KrkClass*'s of built-in object types */
-	struct Exceptions * exceptions;   /**< Pointer to a (static) namespacing struct for the KrkClass*'s of basic exception types */
+    int globalFlags;  /**< Global VM state flags */
+    char *binpath;    /**< A string representing the name of the interpreter binary. */
+    KrkTable strings; /**< Strings table */
+    KrkTable modules; /**< Module cache */
+    KrkInstance *builtins; /**< '\__builtins__' module */
+    KrkInstance *system;   /**< 'kuroko' module */
+    KrkValue
+        *specialMethodNames; /**< Cached strings of important method and function names */
+    struct BaseClasses *baseClasses; /**< Pointer to a (static) namespacing struct for the
+                                        KrkClass*'s of built-in object types */
+    struct Exceptions *exceptions;   /**< Pointer to a (static) namespacing struct for the
+                                        KrkClass*'s of basic exception types */
 
-	/* Garbage collector state */
-	KrkObj * objects;                 /**< Linked list of all objects in the GC */
-	size_t bytesAllocated;            /**< Running total of bytes allocated */
-	size_t nextGC;                    /**< Point at which we should sweep again */
-	size_t grayCount;                 /**< Count of objects marked by scan. */
-	size_t grayCapacity;              /**< How many objects we can fit in the scan list. */
-	KrkObj** grayStack;               /**< Scan list */
+    /* Garbage collector state */
+    KrkObj *objects;       /**< Linked list of all objects in the GC */
+    size_t bytesAllocated; /**< Running total of bytes allocated */
+    size_t nextGC;         /**< Point at which we should sweep again */
+    size_t grayCount;      /**< Count of objects marked by scan. */
+    size_t grayCapacity;   /**< How many objects we can fit in the scan list. */
+    KrkObj **grayStack;    /**< Scan list */
 
-	KrkThreadState * threads;         /**< Invasive linked list of all VM threads. */
-	struct DebuggerState * dbgState;  /**< Opaque debugger state pointer. */
+    KrkThreadState *threads;        /**< Invasive linked list of all VM threads. */
+    struct DebuggerState *dbgState; /**< Opaque debugger state pointer. */
 } KrkVM;
 
 /* Thread-specific flags */
-#define KRK_THREAD_ENABLE_TRACING      (1 << 0)
-#define KRK_THREAD_ENABLE_DISASSEMBLY  (1 << 1)
+#define KRK_THREAD_ENABLE_TRACING (1 << 0)
+#define KRK_THREAD_ENABLE_DISASSEMBLY (1 << 1)
 /* reserved, formerly SCAN_TRACING */
-#define KRK_THREAD_HAS_EXCEPTION       (1 << 3)
-#define KRK_THREAD_SINGLE_STEP         (1 << 4)
-#define KRK_THREAD_SIGNALLED           (1 << 5)
-#define KRK_THREAD_DEFER_STACK_FREE    (1 << 6)
+#define KRK_THREAD_HAS_EXCEPTION (1 << 3)
+#define KRK_THREAD_SINGLE_STEP (1 << 4)
+#define KRK_THREAD_SIGNALLED (1 << 5)
+#define KRK_THREAD_DEFER_STACK_FREE (1 << 6)
 
 /* Global flags */
-#define KRK_GLOBAL_ENABLE_STRESS_GC    (1 << 8)
-#define KRK_GLOBAL_GC_PAUSED           (1 << 9)
-#define KRK_GLOBAL_CLEAN_OUTPUT        (1 << 10)
+#define KRK_GLOBAL_ENABLE_STRESS_GC (1 << 8)
+#define KRK_GLOBAL_GC_PAUSED (1 << 9)
+#define KRK_GLOBAL_CLEAN_OUTPUT (1 << 10)
 /* 11 is available again */
-#define KRK_GLOBAL_REPORT_GC_COLLECTS  (1 << 12)
-#define KRK_GLOBAL_THREADS             (1 << 13)
-#define KRK_GLOBAL_NO_DEFAULT_MODULES  (1 << 14)
+#define KRK_GLOBAL_REPORT_GC_COLLECTS (1 << 12)
+#define KRK_GLOBAL_THREADS (1 << 13)
+#define KRK_GLOBAL_NO_DEFAULT_MODULES (1 << 14)
 
 #ifndef KRK_DISABLE_THREADS
-#  define krk_threadLocal __thread
+#    define krk_threadLocal __thread
 #else
-#  define krk_threadLocal
+#    define krk_threadLocal
 #endif
 
 /**
@@ -231,16 +269,17 @@ typedef struct KrkVM {
  */
 #if !defined(KRK_DISABLE_THREADS) && ((defined(__APPLE__)) && defined(__aarch64__))
 extern void krk_forceThreadData(void);
-#define krk_currentThread (*_macos_currentThread())
-#pragma clang diagnostic ignored "-Wlanguage-extension-token"
-__attribute__((always_inline))
-inline KrkThreadState * _macos_currentThread(void) {
-	extern const uint32_t tls_desc[] asm("_krk_currentThread");
-	const uintptr_t * threadptr; asm ("mrs %0, TPIDRRO_EL0" : "=r"(threadptr));
-	return (KrkThreadState*)(threadptr[tls_desc[2]]+(uint32_t)tls_desc[3]);
+#    define krk_currentThread (*_macos_currentThread())
+#    pragma clang diagnostic ignored "-Wlanguage-extension-token"
+__attribute__((always_inline)) inline KrkThreadState *_macos_currentThread(void) {
+    extern const uint32_t tls_desc[] asm("_krk_currentThread");
+    const uintptr_t *threadptr;
+    asm("mrs %0, TPIDRRO_EL0" : "=r"(threadptr));
+    return (KrkThreadState *)(threadptr[tls_desc[2]] + (uint32_t)tls_desc[3]);
 }
-#elif !defined(KRK_DISABLE_THREADS) && ((defined(_WIN32) && !defined(KRKINLIB)) || defined(KRK_MEDIOCRE_TLS))
-#define krk_currentThread (*krk_getCurrentThread())
+#elif !defined(KRK_DISABLE_THREADS) &&                                                   \
+    ((defined(_WIN32) && !defined(KRKINLIB)) || defined(KRK_MEDIOCRE_TLS))
+#    define krk_currentThread (*krk_getCurrentThread())
 #else
 extern krk_threadLocal KrkThreadState krk_currentThread;
 #endif
@@ -305,13 +344,13 @@ extern void krk_resetStack(void);
  *
  * @param src      Source code to compile and run.
  * @param fromFile Path to the source file, or a representative string like "<stdin>".
- * @return The value of the executed code, which is either the value of an explicit 'return'
- *         statement, or the last expression value from an executed statement.  If an uncaught
- *         exception occurred, this will be @c None and @c krk_currentThread.flags should
+ * @return The value of the executed code, which is either the value of an explicit
+ * 'return' statement, or the last expression value from an executed statement.  If an
+ * uncaught exception occurred, this will be @c None and @c krk_currentThread.flags should
  *         indicate @c KRK_THREAD_HAS_EXCEPTION and @c krk_currentThread.currentException
  *         should contain the raised exception value.
  */
-extern KrkValue krk_interpret(const char * src, const char * fromFile);
+extern KrkValue krk_interpret(const char *src, const char *fromFile);
 
 /**
  * @brief Load and run a source file and return when execution completes.
@@ -325,7 +364,7 @@ extern KrkValue krk_interpret(const char * src, const char * fromFile);
  * @return As with @c krk_interpret, an object representing the newly created module,
  *         or the final return value of the VM execution.
  */
-extern KrkValue krk_runfile(const char * fileName, const char * fromFile);
+extern KrkValue krk_runfile(const char *fileName, const char *fromFile);
 
 /**
  * @brief Push a stack value.
@@ -380,7 +419,7 @@ extern void krk_swap(int distance);
  * @param value Value to examine
  * @return Nul-terminated C string of the type of @p value
  */
-extern const char * krk_typeName(KrkValue value);
+extern const char *krk_typeName(KrkValue value);
 
 /**
  * @brief Attach a native C function to an attribute table.
@@ -397,7 +436,7 @@ extern const char * krk_typeName(KrkValue value);
  * @param function Native function pointer to attach
  * @return A pointer to the object representing the attached function.
  */
-extern KrkNative * krk_defineNative(KrkTable * table, const char * name, NativeFn function);
+extern KrkNative *krk_defineNative(KrkTable *table, const char *name, NativeFn function);
 
 /**
  * @brief Attach a native dynamic property to an attribute table.
@@ -412,7 +451,8 @@ extern KrkNative * krk_defineNative(KrkTable * table, const char * name, NativeF
  * @param func     Native function pointer to attach
  * @return A pointer to the property object created.
  */
-extern KrkNative * krk_defineNativeProperty(KrkTable * table, const char * name, NativeFn func);
+extern KrkNative *krk_defineNativeProperty(KrkTable *table, const char *name,
+                                           NativeFn func);
 
 /**
  * @brief Attach a value to an attribute table.
@@ -436,7 +476,7 @@ extern KrkNative * krk_defineNativeProperty(KrkTable * table, const char * name,
  * @param name  Nil-terminated C string with the name to assign
  * @param obj   Value to attach.
  */
-extern void krk_attachNamedValue(KrkTable * table, const char name[], KrkValue obj);
+extern void krk_attachNamedValue(KrkTable *table, const char name[], KrkValue obj);
 
 /**
  * @brief Attach an object to an attribute table.
@@ -462,7 +502,7 @@ extern void krk_attachNamedValue(KrkTable * table, const char name[], KrkValue o
  * @param name  Nil-terminated C string with the name to assign
  * @param obj   Object to attach.
  */
-extern void krk_attachNamedObject(KrkTable * table, const char name[], KrkObj * obj);
+extern void krk_attachNamedObject(KrkTable *table, const char name[], KrkObj *obj);
 
 /**
  * @brief Produce and raise an exception with a formatted message.
@@ -493,7 +533,7 @@ extern void krk_attachNamedObject(KrkTable * table, const char name[], KrkObj * 
  * @param fmt  Format string.
  * @return As a convenience to C extension authors, returns @c None
  */
-extern KrkValue krk_runtimeError(KrkClass * type, const char * fmt, ...);
+extern KrkValue krk_runtimeError(KrkClass *type, const char *fmt, ...);
 
 /**
  * @brief Raise an exception value.
@@ -533,7 +573,7 @@ extern void krk_attachInnerException(KrkValue innerException);
  *
  * @return Pointer to current thread's thread state.
  */
-extern KrkThreadState * krk_getCurrentThread(void);
+extern KrkThreadState *krk_getCurrentThread(void);
 
 /**
  * @brief Continue VM execution until the next exit trigger.
@@ -548,7 +588,7 @@ extern KrkThreadState * krk_getCurrentThread(void);
  *         returned by the inner function before the VM returned
  *         to the exit frame.
  */
-extern KrkValue  krk_runNext(void);
+extern KrkValue krk_runNext(void);
 
 /**
  * @brief Get the class representing a value.
@@ -561,7 +601,7 @@ extern KrkValue  krk_runNext(void);
  * @param value Reference value to examine.
  * @return A pointer to the value's type's class object.
  */
-extern KrkClass * krk_getType(KrkValue value);
+extern KrkClass *krk_getType(KrkValue value);
 
 /**
  * @brief Determine if a class is an instance or subclass of a given type.
@@ -580,7 +620,7 @@ extern KrkClass * krk_getType(KrkValue value);
  * @param type Class object to test for membership of.
  * @return 1 if @p obj is an instance of @p type or of a subclass of @p type
  */
-extern int krk_isInstanceOf(KrkValue obj, const KrkClass * type);
+extern int krk_isInstanceOf(KrkValue obj, const KrkClass *type);
 
 /**
  * @brief Perform method binding on the stack.
@@ -598,7 +638,7 @@ extern int krk_isInstanceOf(KrkValue obj, const KrkClass * type);
  * @param name   String object with the name of the method to resolve.
  * @return 1 if the method has been bound, 0 if binding failed.
  */
-extern int krk_bindMethod(KrkClass * _class, KrkString * name);
+extern int krk_bindMethod(KrkClass *_class, KrkString *name);
 
 /**
  * @brief Bind a method with super() semantics
@@ -614,7 +654,7 @@ extern int krk_bindMethod(KrkClass * _class, KrkString * name);
  * @param realClass The class to bind if a class method is found.
  * @return 1 if a member has been found, 0 if binding fails.
  */
-extern int krk_bindMethodSuper(KrkClass * baseClass, KrkString * name, KrkClass * realClass);
+extern int krk_bindMethodSuper(KrkClass *baseClass, KrkString *name, KrkClass *realClass);
 
 /**
  * @brief Call a callable value in the current stack context.
@@ -691,22 +731,25 @@ extern KrkValue krk_callStack(int argCount);
  * @param argCount Arguments to collect from the stack.
  * @return The return value of the function.
  */
-extern KrkValue krk_callDirect(KrkObj * callable, int argCount);
+extern KrkValue krk_callDirect(KrkObj *callable, int argCount);
 
 /**
  * @brief Convenience function for creating new types.
  * @memberof KrkClass
  *
  * Creates a class object, output to @p _class, setting its name to @p name, inheriting
- * from @p base, and attaching it with its name to the fields table of the given @p module.
+ * from @p base, and attaching it with its name to the fields table of the given @p
+ * module.
  *
- * @param module  Pointer to an instance for a module to attach to, or @c NULL to skip attaching.
+ * @param module  Pointer to an instance for a module to attach to, or @c NULL to skip
+ * attaching.
  * @param _class  Output pointer to assign the new class object to.
  * @param name    Name of the new class.
  * @param base    Pointer to class object to inherit from.
  * @return A pointer to the class object, equivalent to the value assigned to @p _class.
  */
-extern KrkClass * krk_makeClass(KrkInstance * module, KrkClass ** _class, const char * name, KrkClass * base);
+extern KrkClass *krk_makeClass(KrkInstance *module, KrkClass **_class, const char *name,
+                               KrkClass *base);
 
 /**
  * @brief Finalize a class by collecting pointers to core methods.
@@ -718,7 +761,7 @@ extern KrkClass * krk_makeClass(KrkInstance * module, KrkClass ** _class, const 
  *
  * @param _class Class object to finalize.
  */
-extern void krk_finalizeClass(KrkClass * _class);
+extern void krk_finalizeClass(KrkClass *_class);
 
 /**
  * @brief If there is an active exception, print a traceback to @c stderr
@@ -743,7 +786,7 @@ extern void krk_dumpTraceback(void);
  * @param name Name of the module, which is assigned to @c \__name__
  * @return The instance object representing the module.
  */
-extern KrkInstance * krk_startModule(const char * name);
+extern KrkInstance *krk_startModule(const char *name);
 
 /**
  * @brief Obtain a list of properties for an object.
@@ -765,7 +808,8 @@ extern KrkValue krk_dirObject(int argc, const KrkValue argv[], int hasKw);
  * @param parent    Parent module object, if loaded from a package.
  * @return 1 if the module was loaded, 0 if an @ref ImportError occurred.
  */
-extern int krk_loadModule(KrkString * path, KrkValue * moduleOut, KrkString * runAs, KrkValue parent);
+extern int krk_loadModule(KrkString *path, KrkValue *moduleOut, KrkString *runAs,
+                          KrkValue parent);
 
 /**
  * @brief Load a module by a dotted name.
@@ -776,7 +820,7 @@ extern int krk_loadModule(KrkString * path, KrkValue * moduleOut, KrkString * ru
  * @param name String object of the dot-separated package path to import.
  * @return 1 if the module was loaded, 0 if an @ref ImportError occurred.
  */
-extern int krk_doRecursiveModuleLoad(KrkString * name);
+extern int krk_doRecursiveModuleLoad(KrkString *name);
 
 /**
  * @brief Load the dotted name @p name with the final element as @p runAs
@@ -790,7 +834,7 @@ extern int krk_doRecursiveModuleLoad(KrkString * name);
  * @param runAs Alternative name to attach to @c \__name__ for the module.
  * @return 1 on success, 0 on failure.
  */
-extern int krk_importModule(KrkString * name, KrkString * runAs);
+extern int krk_importModule(KrkString *name, KrkString *runAs);
 
 /**
  * @brief Determine the truth of a value.
@@ -821,12 +865,13 @@ extern int krk_isFalsey(KrkValue value);
  *         exception set in the current thread if the attribute was
  *         not found.
  */
-extern KrkValue krk_valueGetAttribute(KrkValue value, char * name);
+extern KrkValue krk_valueGetAttribute(KrkValue value, char *name);
 
 /**
  * @brief See @ref krk_valueGetAttribute
  */
-extern KrkValue krk_valueGetAttribute_default(KrkValue value, char * name, KrkValue defaultVal);
+extern KrkValue krk_valueGetAttribute_default(KrkValue value, char *name,
+                                              KrkValue defaultVal);
 
 /**
  * @brief Set a property of an object by name.
@@ -845,7 +890,7 @@ extern KrkValue krk_valueGetAttribute_default(KrkValue value, char * name, KrkVa
  *         exception set in the current thread if the object can
  *         not have a property set.
  */
-extern KrkValue krk_valueSetAttribute(KrkValue owner, char * name, KrkValue to);
+extern KrkValue krk_valueSetAttribute(KrkValue owner, char *name, KrkValue to);
 
 /**
  * @brief Delete a property of an object by name.
@@ -860,7 +905,7 @@ extern KrkValue krk_valueSetAttribute(KrkValue owner, char * name, KrkValue to);
  * @param owner The owner of the property to delete.
  * @param name  C-string of the property name to delete.
  */
-extern KrkValue krk_valueDelAttribute(KrkValue owner, char * name);
+extern KrkValue krk_valueDelAttribute(KrkValue owner, char *name);
 
 /**
  * @brief Concatenate two strings.
@@ -875,28 +920,30 @@ extern void krk_addObjects(void);
  *
  * This is equivalent to the opcode instruction OP_LESS.
  */
-extern KrkValue krk_operator_lt(KrkValue,KrkValue);
+extern KrkValue krk_operator_lt(KrkValue, KrkValue);
 
 /**
  * @brief Compare to values, returning @ref True if the left is greater than the right.
  *
  * This is equivalent to the opcode instruction OP_GREATER.
  */
-extern KrkValue krk_operator_gt(KrkValue,KrkValue);
+extern KrkValue krk_operator_gt(KrkValue, KrkValue);
 
 /**
- * @brief Compare two values, returning @ref True if the left is less than or equal to the right.
+ * @brief Compare two values, returning @ref True if the left is less than or equal to the
+ * right.
  *
  * This is equivalent to the opcode instruction OP_LESS_EQUAL.
  */
-extern KrkValue krk_operator_le(KrkValue,KrkValue);
+extern KrkValue krk_operator_le(KrkValue, KrkValue);
 
 /**
- * @brief Compare to values, returning @ref True if the left is greater than or equal to the right.
+ * @brief Compare to values, returning @ref True if the left is greater than or equal to
+ * the right.
  *
  * This is equivalent to the opcode instruction OP_GREATER_EQUAL.
  */
-extern KrkValue krk_operator_ge(KrkValue,KrkValue);
+extern KrkValue krk_operator_ge(KrkValue, KrkValue);
 
 /**
  * @brief Set the maximum recursion call depth.
@@ -915,7 +962,8 @@ extern void krk_setMaximumRecursionDepth(size_t maxDepth);
  * held stack is reallocated, it will be freed when execution returns to the call
  * to @c krk_callNativeOnStack that holds it.
  */
-extern KrkValue krk_callNativeOnStack(size_t argCount, const KrkValue *stackArgs, int hasKw, NativeFn native);
+extern KrkValue krk_callNativeOnStack(size_t argCount, const KrkValue *stackArgs,
+                                      int hasKw, NativeFn native);
 
 /**
  * @brief Set an attribute of an instance object, bypassing \__setattr__.
@@ -929,9 +977,11 @@ extern KrkValue krk_callNativeOnStack(size_t argCount, const KrkValue *stackArgs
  * @param owner Instance object to set an attribute on.
  * @param name  Name of the attribute
  * @param to    New value for the attribute
- * @return The value set, which is likely @p to but may be the returned value of a descriptor \__set__ method.
+ * @return The value set, which is likely @p to but may be the returned value of a
+ * descriptor \__set__ method.
  */
-extern KrkValue krk_instanceSetAttribute_wrapper(KrkValue owner, KrkString * name, KrkValue to);
+extern KrkValue krk_instanceSetAttribute_wrapper(KrkValue owner, KrkString *name,
+                                                 KrkValue to);
 
 /**
  * @brief Implementation of the GET_PROPERTY instruction.
@@ -946,7 +996,7 @@ extern KrkValue krk_instanceSetAttribute_wrapper(KrkValue owner, KrkString * nam
  * @param name Name of the attribute to look up.
  * @return 1 if the attribute was found, 0 otherwise.
  */
-extern int krk_getAttribute(KrkString * name);
+extern int krk_getAttribute(KrkString *name);
 
 /**
  * @brief Implementation of the SET_PROPERTY instruction.
@@ -963,7 +1013,7 @@ extern int krk_getAttribute(KrkString * name);
  * @param name Name of the attribute to set.
  * @return 1 if the attribute could be set, 0 otherwise.
  */
-extern int krk_setAttribute(KrkString * name);
+extern int krk_setAttribute(KrkString *name);
 
 /**
  * @brief Implementation of the DEL_PROPERTY instruction.
@@ -978,7 +1028,7 @@ extern int krk_setAttribute(KrkString * name);
  * @param name Name of the attribute to delete.
  * @return 1 if the attribute was found and can be deleted, 0 otherwise.
  */
-extern int krk_delAttribute(KrkString * name);
+extern int krk_delAttribute(KrkString *name);
 
 /**
  * @brief Initialize the built-in 'kuroko' module.
@@ -991,5 +1041,3 @@ extern void krk_module_init_kuroko(void);
  * Not available if KRK_DISABLE_THREADS is set.
  */
 extern void krk_module_init_threading(void);
-
-
