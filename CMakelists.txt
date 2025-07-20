@@ -30,7 +30,7 @@ set_target_properties(kuroko_shared PROPERTIES OUTPUT_NAME "kuroko")
 
 # 主程序可执行文件 kuroko，链接静态库
 add_executable(kuroko src/kuroko.c)
-target_link_libraries(kuroko PRIVATE kuroko_core)
+target_link_libraries(kuroko PRIVATE kuroko_shared)
 
 # 自动构建 tools 目录下的所有工具为 krk-xxx 格式
 file(GLOB TOOL_SRCS tools/*.c)
@@ -42,17 +42,19 @@ foreach(tool_src ${TOOL_SRCS})
 endforeach()
 
 # 将 src/modules/module_*.c 文件构建为对应的模块 .so/.dll
-file(GLOB MODULE_SRCS src/modules/module_*.c)
-list(REMOVE_ITEM MODULE_SRCS src/modules/module_socket.c)
-list(REMOVE_ITEM MODULE_SRCS src/modules/module_time.c)
-# foreach(mod_src ${MODULE_SRCS})
-#     get_filename_component(mod_name ${mod_src} NAME_WE)
-#     string(REPLACE "src/modules/module_" "" so_name ${mod_name})
-#     add_library(${so_name} SHARED ${mod_src})
-#     target_link_libraries(${so_name} PRIVATE kuroko_shared)
-#     # 去除 lib 前缀，使模块名就是模块文件名
-#     set_target_properties(${so_name} PROPERTIES PREFIX "" OUTPUT_NAME ${so_name})
-# endforeach()
+file(GLOB MODULE_SRCS src/modules/module_os.c)
+# list(REMOVE_ITEM MODULE_SRCS src/modules/module_socket.c)
+# list(REMOVE_ITEM MODULE_SRCS src/modules/module_time.c)
+foreach(mod_src ${MODULE_SRCS})
+    # 提取不带路径和扩展名的纯文件名
+    get_filename_component(mod_name ${mod_src} NAME_WE)
+    # 移除字符串中的前缀
+    string(REPLACE "module_" "" shared_name ${mod_name})
+    add_library(${shared_name} SHARED ${mod_src})
+    target_link_libraries(${shared_name} PRIVATE kuroko_shared)
+    # 去除 lib 前缀，使模块名就是模块文件名
+    set_target_properties(${shared_name} PROPERTIES PREFIX "" OUTPUT_NAME ${shared_name})
+endforeach()
 
 # 安装规则：可执行文件、库、头文件和模块
 install(TARGETS kuroko kuroko_shared kuroko_core
